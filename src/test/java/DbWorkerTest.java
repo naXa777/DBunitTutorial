@@ -1,30 +1,53 @@
+import org.dbunit.Assertion;
 import org.dbunit.DBTestCase;
 import org.dbunit.PropertiesBasedJdbcDatabaseTester;
+import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.CompositeOperation;
 import org.dbunit.operation.DatabaseOperation;
+import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
 
 import static org.junit.Assert.*;
 
 public class DbWorkerTest extends DBTestCase {
     private DbWorker worker;
+    private Properties properties;
+
+    @BeforeClass
+    public void setUp(){
+        properties = new Properties();
+        try(FileInputStream fis = new FileInputStream("src\\test\\resourses\\db.config.properties")) {
+            properties.load(fis);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public DbWorkerTest(String name) {
         //прописываем проперти для работы с ДБ
         super(name);
         System.setProperty(PropertiesBasedJdbcDatabaseTester.
-                DBUNIT_DRIVER_CLASS,"org.postgresql.Driver");
+                DBUNIT_DRIVER_CLASS,properties.getProperty("db.driver"));
         System.setProperty(PropertiesBasedJdbcDatabaseTester.
-                DBUNIT_CONNECTION_URL,"jdbc:postgresql://localhost:5432/dbunittut");
+                DBUNIT_CONNECTION_URL,properties.getProperty("db.url"));
         System.setProperty(PropertiesBasedJdbcDatabaseTester.
-                DBUNIT_USERNAME,"postgres");
+                DBUNIT_USERNAME,properties.getProperty("db.user"));
         System.setProperty(PropertiesBasedJdbcDatabaseTester.
-                DBUNIT_PASSWORD,"root");
+                DBUNIT_PASSWORD,properties.getProperty("db.password"));
+        System.setProperty(PropertiesBasedJdbcDatabaseTester.
+                        DBUNIT_SCHEMA, properties.getProperty("db.schema"));
     }
 
     @Override
@@ -36,7 +59,7 @@ public class DbWorkerTest extends DBTestCase {
     @Override
     //метод перед каждым тестом
     protected DatabaseOperation getSetUpOperation() throws Exception {
-
+        DbWorker worker = new DbWorker();
 
         //Эта операция вставляет содержимое набора данных в базу данных.
         // Эта операция предполагает, что данные таблицы не существуют в целевой базе данных, и завершается ошибкой, если это не так.
@@ -79,9 +102,14 @@ public class DbWorkerTest extends DBTestCase {
     }
 
 
-    public void testworkWithDataWhithoutAnswer() {
+    public void testworkWithDataWhithoutAnswer() throws Exception {
+        String sqlRequest= "INSERT INTO user (firstname, lastname) VALUES('bob','marley');";
+        worker.workWithDataWhithoutAnswer(sqlRequest);
+        IDataSet actualData = getDataSet();
+        IDataSet expected = new FlatXmlDataSetBuilder().build(
+                new FileInputStream("src\\test\\resourses\\expUser.xml"));
+        Assertion.assertEqualsIgnoreCols(expected,actualData);
+
     }
-
-
 
 }

@@ -27,7 +27,7 @@ public class DbWorker {
 
     public void workWithDataWhithoutAnswer(String command){
         try(Statement statement = connection.createStatement()){
-            statement.execute("");
+            statement.execute(command);
         } catch (SQLException e) {
             e.printStackTrace();
         }
