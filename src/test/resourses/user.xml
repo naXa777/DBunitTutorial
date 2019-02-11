@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dataset>
-    <USER userid='1' first_name='Vinod' last_name='Kashyap' />
+    <user id='1' firrstname='Vinod' lastname='Kashyap' />
 
-    <USER userid='2' first_name='Dhwani' last_name='Kashyap' />
+    <user id='2' firrstname='Dhwani' lastname='Kashyap' />
 
-    <USER userid='3' first_name='Asmi' last_name='Kashyap' />
+    <user id='3' firrstname='Asmi' lastname='Kashyap' />
 </dataset>

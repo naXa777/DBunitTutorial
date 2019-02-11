@@ -11,11 +11,12 @@ public class DbWorker {
     }
 
     private void connectToDb(){
-        String url = "jdbc:mysql://localhost:3306/user";
-        String user = "root";
+        String url = "jdbc:postgresql://localhost:5432/dbunittut";
+        String user = "postgres";
+        String password = "root";
         try {
-            Class.forName("com.mysql.jdbc.Driver");
-            connection = DriverManager.getConnection(url,user,"");
+            Class.forName("org.postgresql.Driver");
+            connection = DriverManager.getConnection(url,user,password);
 
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
