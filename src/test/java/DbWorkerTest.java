@@ -4,6 +4,7 @@ import org.dbunit.PropertiesBasedJdbcDatabaseTester;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.ITable;
+import org.dbunit.dataset.filter.DefaultColumnFilter;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.CompositeOperation;
 import org.dbunit.operation.DatabaseOperation;
@@ -107,7 +108,10 @@ public class DbWorkerTest extends DBTestCase {
         IDataSet expectedDataSet = new FlatXmlDataSetBuilder().build(
                 new FileInputStream("src\\test\\resourses\\expUser.xml"));
         ITable expectedTable = expectedDataSet.getTable("user");
-        Assertion.assertEquals(expectedTable,actualTable);
+        ITable filteredTable = DefaultColumnFilter.includedColumnsTable(
+                actualTable,
+                expectedTable.getTableMetaData().getColumns());
+        Assertion.assertEquals(expectedTable,filteredTable);
 
     }
 
