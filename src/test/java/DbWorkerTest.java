@@ -3,13 +3,11 @@ import org.dbunit.DBTestCase;
 import org.dbunit.PropertiesBasedJdbcDatabaseTester;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
+import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.CompositeOperation;
 import org.dbunit.operation.DatabaseOperation;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -22,8 +20,10 @@ public class DbWorkerTest extends DBTestCase {
     private DbWorker worker;
     private Properties properties;
 
-    @BeforeClass
-    public void setUp(){
+
+    public DbWorkerTest(String name) {
+        //прописываем проперти для работы с ДБ
+        super(name);
         properties = new Properties();
         try(FileInputStream fis = new FileInputStream("src\\test\\resourses\\db.config.properties")) {
             properties.load(fis);
@@ -32,12 +32,6 @@ public class DbWorkerTest extends DBTestCase {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-
-    public DbWorkerTest(String name) {
-        //прописываем проперти для работы с ДБ
-        super(name);
         System.setProperty(PropertiesBasedJdbcDatabaseTester.
                 DBUNIT_DRIVER_CLASS,properties.getProperty("db.driver"));
         System.setProperty(PropertiesBasedJdbcDatabaseTester.
@@ -59,7 +53,7 @@ public class DbWorkerTest extends DBTestCase {
     @Override
     //метод перед каждым тестом
     protected DatabaseOperation getSetUpOperation() throws Exception {
-        DbWorker worker = new DbWorker();
+        worker = new DbWorker();
 
         //Эта операция вставляет содержимое набора данных в базу данных.
         // Эта операция предполагает, что данные таблицы не существуют в целевой базе данных, и завершается ошибкой, если это не так.
@@ -82,7 +76,7 @@ public class DbWorkerTest extends DBTestCase {
         //Эта составная операция выполняет операцию DELETE_ALL, за которой следует операция INSERT.
         // Это самый безопасный подход для обеспечения того, чтобы база данных находилась в известном состоянии.
         // Это подходит для тестов, которые требуют, чтобы база данных содержала только определенный набор данных.
-        return DatabaseOperation.CLEAN_INSERT;
+        //return DatabaseOperation.CLEAN_INSERT;
 
 
         //Эта операция буквально обновляет содержимое набора данных в целевой базе данных.
@@ -91,24 +85,29 @@ public class DbWorkerTest extends DBTestCase {
         // Этот подход больше подходит для тестов, которые предполагают, что в базе данных могут существовать другие данные.
         //если они написаны правильно, тесты, использующие эту стратегию,
         // могут даже выполняться на заполненной базе данных, например на копии рабочей базы данных.
-        //return DatabaseOperation.REFRESH;
+        return DatabaseOperation.REFRESH;
     }
 
     @Override
     //метод после теста
     protected DatabaseOperation getTearDownOperation() throws Exception {
         //Операция, не делающая абсолютно ничего
-        return DatabaseOperation.NONE;
+        return DatabaseOperation.DELETE_ALL;
     }
 
 
     public void testworkWithDataWhithoutAnswer() throws Exception {
-        String sqlRequest= "INSERT INTO user (firstname, lastname) VALUES('bob','marley');";
+
+        String sqlRequest= "INSERT INTO public.user (firstname, lastname) VALUES('bob','marley');";
         worker.workWithDataWhithoutAnswer(sqlRequest);
-        IDataSet actualData = getDataSet();
-        IDataSet expected = new FlatXmlDataSetBuilder().build(
+
+        IDataSet actualDataSet = getConnection().createDataSet();
+        ITable actualTable = actualDataSet.getTable("user");
+
+        IDataSet expectedDataSet = new FlatXmlDataSetBuilder().build(
                 new FileInputStream("src\\test\\resourses\\expUser.xml"));
-        Assertion.assertEqualsIgnoreCols(expected,actualData);
+        ITable expectedTable = expectedDataSet.getTable("user");
+        Assertion.assertEquals(expectedTable,actualTable);
 
     }
 
