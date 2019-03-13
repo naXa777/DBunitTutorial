@@ -90,7 +90,7 @@ public class DbWorkerTest extends DBTestCase {
     }
 
 
-    public void testworkWithDataWhithoutAnswer() throws Exception {
+    public void testWorkWithDataWithoutAnswer() throws Exception {
 
         String sqlRequest= "INSERT INTO public.user (firstname, lastname) VALUES('bob','marley');";
         worker.workWithDataWhithoutAnswer(sqlRequest);
