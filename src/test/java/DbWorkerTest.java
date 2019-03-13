@@ -1,21 +1,15 @@
 import org.dbunit.Assertion;
 import org.dbunit.DBTestCase;
 import org.dbunit.PropertiesBasedJdbcDatabaseTester;
-import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.filter.DefaultColumnFilter;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
-import org.dbunit.operation.CompositeOperation;
 import org.dbunit.operation.DatabaseOperation;
-import org.junit.*;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
-
-import static org.junit.Assert.*;
 
 public class DbWorkerTest extends DBTestCase {
     private DbWorker worker;
@@ -28,8 +22,6 @@ public class DbWorkerTest extends DBTestCase {
         properties = new Properties();
         try(FileInputStream fis = new FileInputStream("src\\test\\resourses\\db.config.properties")) {
             properties.load(fis);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
