@@ -7,32 +7,32 @@ import org.dbunit.dataset.filter.DefaultColumnFilter;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 public class DbWorkerTest extends DBTestCase {
     private DbWorker worker;
-    private Properties properties;
 
 
     public DbWorkerTest(String name) {
-        //прописываем проперти для работы с ДБ
         super(name);
-        properties = new Properties();
-        try(FileInputStream fis = new FileInputStream("src\\test\\resourses\\db.config.properties")) {
-            properties.load(fis);
+        //прописываем проперти для работы с ДБ
+        Properties properties = new Properties();
+        try {
+            final InputStream is = DbWorkerTest.class.getClassLoader().getResourceAsStream("db.config.properties");
+            properties.load(is);
         } catch (IOException e) {
             e.printStackTrace();
         }
         System.setProperty(PropertiesBasedJdbcDatabaseTester.
-                DBUNIT_DRIVER_CLASS,properties.getProperty("db.driver"));
+                DBUNIT_DRIVER_CLASS, properties.getProperty("db.driver"));
         System.setProperty(PropertiesBasedJdbcDatabaseTester.
-                DBUNIT_CONNECTION_URL,properties.getProperty("db.url"));
+                DBUNIT_CONNECTION_URL, properties.getProperty("db.url"));
         System.setProperty(PropertiesBasedJdbcDatabaseTester.
-                DBUNIT_USERNAME,properties.getProperty("db.user"));
+                DBUNIT_USERNAME, properties.getProperty("db.user"));
         System.setProperty(PropertiesBasedJdbcDatabaseTester.
-                DBUNIT_PASSWORD,properties.getProperty("db.password"));
+                DBUNIT_PASSWORD, properties.getProperty("db.password"));
         System.setProperty(PropertiesBasedJdbcDatabaseTester.
                         DBUNIT_SCHEMA, properties.getProperty("db.schema"));
     }
@@ -40,7 +40,8 @@ public class DbWorkerTest extends DBTestCase {
     @Override
     protected IDataSet getDataSet() throws Exception {
         //делаем таблицу в ХМЛ
-        return new FlatXmlDataSetBuilder().build(new FileInputStream("src\\test\\resourses\\user.xml"));
+        final InputStream is = DbWorkerTest.class.getClassLoader().getResourceAsStream("user.xml");
+        return new FlatXmlDataSetBuilder().build(is);
     }
 
     @Override
@@ -97,14 +98,14 @@ public class DbWorkerTest extends DBTestCase {
         IDataSet actualDataSet = getConnection().createDataSet();
         ITable actualTable = actualDataSet.getTable("user");
 
-        IDataSet expectedDataSet = new FlatXmlDataSetBuilder().build(
-                new FileInputStream("src\\test\\resourses\\expUser.xml"));
+        final InputStream is = DbWorkerTest.class.getClassLoader().getResourceAsStream("expUser.xml");
+        IDataSet expectedDataSet = new FlatXmlDataSetBuilder().build(is);
         ITable expectedTable = expectedDataSet.getTable("user");
         ITable filteredTable = DefaultColumnFilter.includedColumnsTable(
                 actualTable,
                 expectedTable.getTableMetaData().getColumns());
-        Assertion.assertEquals(expectedTable,filteredTable);
 
+        Assertion.assertEquals(expectedTable,filteredTable);
     }
 
 }
